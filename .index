@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura Quiz: Pontos Turísticos do Brasil</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>🇧🇷 Aventura Quiz: Pontos Turísticos do Brasil</h1>
+        <div id="question-area">
+            </div>
+        <div id="options-container">
+            </div>
+        <button id="next-button" disabled>Próxima Pergunta</button>
+        <div id="result">
+            </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.quiz-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+}
+
+h1 {
+    color: #009900; /* Verde-Bandeira */
+    margin-bottom: 25px;
+}
+
+#question-area {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+#options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option-btn {
+    background-color: #007bff; /* Azul-Bandeira */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+}
+
+.option-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.option-btn.correct {
+    background-color: #28a745; /* Verde para correto */
+}
+
+.option-btn.incorrect {
+    background-color: #dc3545; /* Vermelho para incorreto */
+}
+
+#next-button {
+    background-color: #ffc107; /* Amarelo-Bandeira */
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+#next-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #009900;
+}
+// 1. Array de Perguntas sobre Pontos Turísticos do Brasil
+const questions = [
+    {
+        question: "Em qual cidade brasileira se localiza o **Cristo Redentor**?",
+        options: ["Salvador", "Rio de Janeiro", "São Paulo", "Belo Horizonte"],
+        correctAnswer: "Rio de Janeiro"
+    },
+    {
+        question: "Qual o nome do famoso centro histórico de Salvador, Bahia, conhecido por suas casinhas coloridas?",
+        options: ["Pelourinho", "Mercado Modelo", "Farol da Barra", "Elevador Lacerda"],
+        correctAnswer: "Pelourinho"
+    },
+    {
+        question: "Qual Parque Nacional é famoso por suas dunas de areia branca e lagoas de água doce no Maranhão?",
+        options: ["Chapada Diamantina", "Serra da Capivara", "Lençóis Maranhenses", "Parque Nacional do Iguaçu"],
+        correctAnswer: "Lençóis Maranhenses"
+    }
+    // Adicione mais perguntas aqui!
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+let answered = false;
+
+// 2. Elementos do DOM
+const questionArea = document.getElementById('question-area');
+const optionsContainer = document.getElementById('options-container');
+const nextButton = document.getElementById('next-button');
+const resultArea = document.getElementById('result');
+
+// 3. Função para exibir a pergunta atual
+function showQuestion() {
+    answered = false;
+    nextButton.disabled = true;
+    optionsContainer.innerHTML = ''; // Limpa as opções anteriores
+    resultArea.textContent = ''; // Limpa a mensagem de resultado
+
+    if (currentQuestionIndex < questions.length) {
+        const currentQuestion = questions[currentQuestionIndex];
+        questionArea.innerHTML = currentQuestion.question;
+
+        currentQuestion.options.forEach(option => {
+            const button = document.createElement('button');
+            button.textContent = option;
+            button.classList.add('option-btn');
+            button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.correctAnswer));
+            optionsContainer.appendChild(button);
+        });
+    } else {
+        showResults();
+    }
+}
+
+// 4. Função para verificar a resposta
+function selectAnswer(button, selectedOption, correctAnswer) {
+    if (answered) return; // Impede múltiplos cliques
+
+    answered = true;
+    nextButton.disabled = false;
+
+    // Desabilita todos os botões de opção após a escolha
+    Array.from(optionsContainer.children).forEach(btn => btn.disabled = true);
+
+    if (selectedOption === correctAnswer) {
+        score++;
+        button.classList.add('correct');
+        resultArea.textContent = '✅ Resposta Correta!';
+    } else {
+        button.classList.add('incorrect');
+        resultArea.textContent = `❌ Resposta Incorreta. A correta era: ${correctAnswer}`;
+        // Opcional: Destacar a resposta correta
+        Array.from(optionsContainer.children).forEach(btn => {
+            if (btn.textContent === correctAnswer) {
+                btn.classList.add('correct');
+            }
+        });
+    }
+}
+
+// 5. Função para ir para a próxima pergunta
+nextButton.addEventListener('click', () => {
+    if (answered) {
+        currentQuestionIndex++;
+        showQuestion();
+    }
+});
+
+// 6. Função para mostrar o resultado final
+function showResults() {
+    questionArea.textContent = "Aventura Concluída!";
+    optionsContainer.innerHTML = '';
+    nextButton.style.display = 'none'; // Esconde o botão Próxima
+
+    let finalMessage = `Sua Pontuação Final: ${score} de ${questions.length}.`;
+
+    if (score === questions.length) {
+        finalMessage += " 🏆 Parabéns, você é um(a) expert em turismo brasileiro!";
+    } else if (score >= questions.length / 2) {
+        finalMessage += " ✨ Muito bom! Você conhece bem o Brasil.";
+    } else {
+        finalMessage += " 📚 Continue explorando e aprendendo mais sobre o nosso país!";
+    }
+
+    resultArea.textContent = finalMessage;
+}
+
+// 7. Inicia o Quiz
+showQuestion();
